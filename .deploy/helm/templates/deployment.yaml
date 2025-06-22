@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ Values.frontend.name }}
+        app: {{ .Values.frontend.name }}
     spec:
       containers:
         - name: {{ .Values.frontend.containerName }}
@@ -42,7 +42,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ Values.backend.name }}
+        app: {{ .Values.backend.name }}
     spec:
       containers:
         - name: {{ .Values.backend.containerName }}
