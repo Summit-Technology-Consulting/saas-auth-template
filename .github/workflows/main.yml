@@ -44,14 +44,11 @@ jobs:
           version: ${{ needs.version.outputs.version }}
 
   push-helm-chart:
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/push-helm-chart.yml
     needs: [version, build]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Push Helm Chart
-        uses: ./.github/workflows/push-helm-chart.yml
-        with:
-          app-repo-token: ${{ secrets.GPAT_TOKEN }}
-          version: ${{ needs.version.outputs.version }}
+    with:
+      version: ${{ needs.version.outputs.version }}
+    secrets:
+      repo_token: ${{ secrets.GPAT_TOKEN }}
 
 
