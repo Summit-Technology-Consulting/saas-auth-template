@@ -20,7 +20,7 @@ runs:
 
     - name: Update Helm chart version
       run: |
-        sed -i "s/^version: .*/version: ${{ inputs.version }}/" helm/Chart.yaml
+        sed -i "s/^version: .*/version: ${{ inputs.version }}/" ./.deploy/helm/Chart.yaml
       shell: bash
 
     - name: Package Helm chart
