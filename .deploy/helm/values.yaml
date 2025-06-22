@@ -2,7 +2,7 @@ frontend:
   image:
     repository: 'jpyles0524/saas-template-frontend'
     tag: latest
-    pullPolicy: ifNotPresent
+    pullPolicy: IfNotPresent
 
   name: 'saas-template-frontend'
   replicas: 1
@@ -32,7 +32,7 @@ backend:
   image:
     repository: 'jpyles0524/saas-template-backend'
     tag: latest
-    pullPolicy: ifNotPresent
+    pullPolicy: IfNotPresent
 
   name: 'saas-template-backend'
   replicas: 1
