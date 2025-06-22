@@ -1,7 +1,12 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from saas_backend.auth.database import Base, engine
+# STL
 from typing import final
+
+# PDM
 from pydantic import BaseModel
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
+
+# LOCAL
+from saas_backend.auth.database import Base
 
 
 class BaseUser(BaseModel):
@@ -34,6 +39,3 @@ class Blacklist(Base):
     id = Column(Integer, primary_key=True, index=True)
     jti = Column(String, unique=True, index=True)
     expires_at = Column(DateTime, index=True)
-
-
-Base.metadata.create_all(bind=engine)

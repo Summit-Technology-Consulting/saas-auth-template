@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.frontend.name }} 
+  labels:
+    app: {{ .Values.frontend.name }}
+spec:
+  replicas: {{ .Values.frontend.replicas }} 
+  selector:
+    matchLabels:
+      app: {{ .Values.frontend.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ Values.frontend.name }}
+    spec:
+      containers:
+        - name: {{ .Values.frontend.containerName }}
+          {{ if .Values.frontend.image.repository }}
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          {{ else }}
+          image: "{{ .Chart.Name }}:{{ .Chart.Version }}"
+          {{ end }}
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          command: {{ .Values.frontend.containerCommand | toJson }}
+          ports:
+            - containerPort: {{ .Values.frontend.containerPort }}
+          env: {{ toYaml .Values.frontend.env | nindent 12 }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.backend.name }} 
+  labels:
+    app: {{ .Values.backend.name }}
+spec:
+  replicas: {{ .Values.backend.replicas }} 
+  selector:
+    matchLabels:
+      app: {{ .Values.backend.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ Values.backend.name }}
+    spec:
+      containers:
+        - name: {{ .Values.backend.containerName }}
+          {{ if .Values.backend.image.repository }}
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          {{ else }}
+          image: "{{ .Chart.Name }}:{{ .Chart.Version }}"
+          {{ end }}
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          command: {{ .Values.backend.containerCommand | toJson }}
+          ports:
+            - containerPort: {{ .Values.backend.containerPort }}
+          env: {{ toYaml .Values.backend.env | nindent 12 }}

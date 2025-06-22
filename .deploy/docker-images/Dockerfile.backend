@@ -1,19 +1,21 @@
 FROM python:3.12-slim
 
-# install uv 
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
 # Install Python virtual environment tools
-RUN apt-get update && apt-get install -y python3-venv
+RUN apt-get update && apt-get install -y python3-venv curl
+
+# Install uv
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+RUN sh /uv-installer.sh && rm /uv-installer.sh
 
 # Create and activate a virtual environment
 RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+ENV PATH="/opt/venv/bin:/root/.local/bin:$PATH"
 
 # Install pdm within the virtual environment
 RUN pip install pdm
 
 # RUN pdm config use_uv true
+RUN pdm config use_uv true
 
 WORKDIR /app
 
@@ -27,4 +29,7 @@ COPY src ./src
 
 RUN pdm install
 
-COPY start.sh ./start.sh
+RUN mkdir -p ./data
+RUN touch ./data/database.db
+
+COPY .scripts/start.sh ./start.sh

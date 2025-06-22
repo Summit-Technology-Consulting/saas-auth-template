@@ -1,8 +1,13 @@
+# STL
 import hashlib
-from saas_backend.auth.jwt_handler import JwtHandler
+
+# PDM
+from fastapi import Header, HTTPException
+
+# LOCAL
+from saas_backend.auth.models import User, APIKey
 from saas_backend.auth.database import get_db
-from saas_backend.auth.models import APIKey, User
-from fastapi import HTTPException, Header
+from saas_backend.auth.jwt_handler import JwtHandler
 
 
 class UserManager:

@@ -1,16 +1,19 @@
+import jwt from "jsonwebtoken";
 import NextAuth, { NextAuthOptions, User as NextAuthUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import jwt from "jsonwebtoken";
 
 interface ExtendedUser extends NextAuthUser {
   id: string;
   username: string;
 }
 
+const TOKEN_EXPIRY = Number(process.env.ACCESS_TOKEN_EXPIRY_MINUTES) || 120;
+
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "",
   session: {
     strategy: "jwt",
+    maxAge: TOKEN_EXPIRY,
   },
   pages: {
     signOut: "/auth/signout",

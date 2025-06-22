@@ -1,15 +1,15 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getSession, signIn } from "next-auth/react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import useUser from "@/hooks/useUser";
+import { getSession, signIn } from "next-auth/react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 export type AuthModalProps = {
@@ -52,6 +52,8 @@ export default function AuthModal({ isOpen, setIsOpen }: AuthModalProps) {
           creditBalance: session?.user?.startingCredits,
         });
         setIsOpen(false);
+        setUsername("");
+        setPassword("");
       }
     } else {
       const response = await fetch("/api/register", {
@@ -70,11 +72,8 @@ export default function AuthModal({ isOpen, setIsOpen }: AuthModalProps) {
       }
 
       toast.success(data.message);
+      setIsLogin(true);
     }
-
-    setUsername("");
-    setPassword("");
-    setIsOpen(false);
   };
 
   return (

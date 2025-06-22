@@ -1,0 +1,57 @@
+frontend:
+  image:
+    repository: 'jpyles0524/saas-template-frontend'
+    tag: latest
+    pullPolicy: ifNotPresent
+
+  name: 'saas-template-frontend'
+  replicas: 1
+  containerName: 'saas-template-frontend'
+  containerPort: 3000
+  containerCommand: ["pnpm", "run", "start"]
+  serviceType: NodePort
+
+  ports:
+    - port: 80
+      targetPort: 3000
+      nodePort: 32350
+      protocol: TCP
+
+  env:
+    - name: JWT_SECRET
+      value: 123
+
+    - name: NEXT_AUTH_SECRET
+      value: 123
+
+    - name: API_URL
+      value: http://saas-template-backend:8000
+
+
+backend:
+  image:
+    repository: 'jpyles0524/saas-template-backend'
+    tag: latest
+    pullPolicy: ifNotPresent
+
+  name: 'saas-template-backend'
+  replicas: 1
+  containerName: 'saas-template-backend'
+  containerPort: 8000
+  containerCommand: ["./start.sh"]
+  serviceType: ClusterIP
+
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+
+  env:
+    - name: JWT_SECRET
+      value: 123
+
+    - name: APP_MODE
+      value: prod
+
+    - name: DATABASE_URL
+      value: sqlite:///data/database.db
