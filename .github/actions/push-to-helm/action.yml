@@ -8,6 +8,9 @@ inputs:
   version:
     required: true
     description: "The version of the Helm chart"
+  chart_name:
+    required: true
+    description: "The chart name"
 
 runs:
   using: 'composite'
@@ -37,24 +40,23 @@ runs:
         cd target-repo
         git config user.name "github-actions"
         git config user.email "github-actions@github.com"
-        git fetch origin gh-pages  # Fetch gh-pages explicitly
-        git checkout gh-pages      # Checkout gh-pages branch
-        git pull origin gh-pages    # Pull latest changes from gh-pages
+        git fetch origin gh-pages
+        git checkout gh-pages
+        git pull origin gh-pages
       shell: bash
 
     - name: Copy package and update index
       run: |
-        APP_NAME="scraperr"
-        mkdir -p target-repo/charts/$APP_NAME
-        cp packaged/*.tgz target-repo/charts/$APP_NAME/
-        cd target-repo/charts/$APP_NAME
-        helm repo index . --url https://jaypyles.github.io/helm/charts/$APP_NAME
+        mkdir -p target-repo/charts/${{ inputs.chart_name }}
+        cp packaged/*.tgz target-repo/charts/${{ inputs.chart_name }}/
+        cd target-repo/charts/${{ inputs.chart_name }}
+        helm repo index . --url https://jaypyles.github.io/helm/charts/${{ inputs.chart_name }}
       shell: bash
 
     - name: Commit and push to target repo
       run: |
         cd target-repo
         git add charts/
-        git commit -m "Update $APP_NAME chart $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes"
+        git commit -m "Update ${{ inputs.chart_name }} chart $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes"
         git push https://x-access-token:${{ inputs.app-repo-token }}@github.com/jaypyles/helm.git gh-pages
       shell: bash
