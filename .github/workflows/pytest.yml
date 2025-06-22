@@ -19,7 +19,7 @@ jobs:
         run: echo "ENV=test" >> $GITHUB_ENV
 
       - name: Set UV Config
-        uses: pdm config use_uv true 
+        run: pdm config use_uv true 
 
       - name: Install pdm
         run: pip install pdm
