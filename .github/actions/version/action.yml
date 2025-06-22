@@ -27,7 +27,6 @@ runs:
         if [[ $COMMIT_MSG =~ .*\[no\ bump\].* ]]; then
           echo "version_bump=false" >> $GITHUB_OUTPUT
           echo "Not bumping version"
-          echo "version=$(grep -oP 'version:\s*\K[0-9]+\.[0-9]+\.[0-9]+' ./.deploy/helm/Chart.yaml | tr -d '[:space:]')" >> $GITHUB_OUTPUT
         else
           echo "version_bump=true" >> $GITHUB_OUTPUT
           echo "Bumping version"
@@ -58,3 +57,15 @@ runs:
       env:
         VERSION: ${{ env.VERSION }}
         GITHUB_TOKEN: ${{ inputs.git_token }}
+
+    - name: Set composite output version
+      id: set_composite_version
+      shell: bash
+      run: |
+        if [[ "${{ steps.check_version_bump.outputs.version_bump }}" == "false" ]]; then
+          EXISTING_VERSION=$(grep -oP 'version:\s*\K[0-9]+\.[0-9]+\.[0-9]+' ./.deploy/helm/Chart.yaml | tr -d '[:space:]')
+          echo "version=$EXISTING_VERSION" >> $GITHUB_OUTPUT
+          echo "The existing version is "$EXISTING_VERSION"
+        else
+          echo "version=${{ steps.set_version.outputs.version }}" >> $GITHUB_OUTPUT
+        fi
