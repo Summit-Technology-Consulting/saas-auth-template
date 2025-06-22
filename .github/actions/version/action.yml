@@ -8,7 +8,7 @@ inputs:
 outputs:
   version:
     description: "The new version number"
-    value: ${{ steps.set_version.outputs.version }}
+    value: ${{ steps.set_composite_version.outputs.version }}
 
 runs:
   using: "composite"
