@@ -17,3 +17,5 @@ COPY frontend/postcss.config.mjs ./postcss.config.mjs
 COPY frontend/next.config.ts ./next.config.ts
 COPY frontend/eslint.config.mjs ./eslint.config.mjs
 COPY frontend/components.json ./components.json
+
+RUN pnpm run build
