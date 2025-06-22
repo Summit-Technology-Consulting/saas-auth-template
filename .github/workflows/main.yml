@@ -49,7 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Push Helm Chart
-        uses: ./.github/workflows/push-to-helm.yml
+        uses: ./.github/workflows/push-helm-chart.yml
         with:
           app-repo-token: ${{ secrets.GPAT_TOKEN }}
           version: ${{ needs.version.outputs.version }}
