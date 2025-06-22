@@ -21,7 +21,7 @@ frontend:
     - name: JWT_SECRET
       value: "123"
 
-    - name: NEXT_AUTH_SECRET
+    - name: NEXTAUTH_SECRET
       value: "123"
 
     - name: API_URL
