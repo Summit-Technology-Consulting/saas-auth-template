@@ -18,6 +18,7 @@ jobs:
       version: ${{ steps.version_bump.outputs.version }}
 
     steps:
+      - uses: actions/checkout@v4
       - name: Run version bump
         id: version_bump
         uses: ./.github/actions/version
