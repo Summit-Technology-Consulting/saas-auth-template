@@ -4,7 +4,7 @@
 VERSION_TYPE=$1 # patch, minor, major
 
 # Get the current version from the Chart.yaml file
-current_version=$(grep -oP 'version:\s*\K[0-9]+\.[0-9]+\.[0-9]+' helm/Chart.yaml | tr -d '[:space:]')
+current_version=$(grep -oP 'version:\s*\K[0-9]+\.[0-9]+\.[0-9]+' ./.deploy/helm/Chart.yaml | tr -d '[:space:]')
 
 # Increment the version number
 if [ "$VERSION_TYPE" == "patch" ]; then

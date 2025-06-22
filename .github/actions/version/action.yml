@@ -27,6 +27,7 @@ runs:
         if [[ $COMMIT_MSG =~ .*\[no\ bump\].* ]]; then
           echo "version_bump=false" >> $GITHUB_OUTPUT
           echo "Not bumping version"
+          echo "version=$(grep -oP 'version:\s*\K[0-9]+\.[0-9]+\.[0-9]+' ./.deploy/helm/Chart.yaml | tr -d '[:space:]')" >> $GITHUB_OUTPUT
         else
           echo "version_bump=true" >> $GITHUB_OUTPUT
           echo "Bumping version"
@@ -51,7 +52,7 @@ runs:
 
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add helm/Chart.yaml
+        git add ./.deploy/helm/Chart.yaml
         git commit -m "chore: bump version to $VERSION"
         git push
       env:
