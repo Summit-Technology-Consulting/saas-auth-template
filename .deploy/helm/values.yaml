@@ -19,10 +19,10 @@ frontend:
 
   env:
     - name: JWT_SECRET
-      value: 123
+      value: "123"
 
     - name: NEXT_AUTH_SECRET
-      value: 123
+      value: "123"
 
     - name: API_URL
       value: http://saas-template-backend:8000
@@ -48,7 +48,7 @@ backend:
 
   env:
     - name: JWT_SECRET
-      value: 123
+      value: "123"
 
     - name: APP_MODE
       value: prod
