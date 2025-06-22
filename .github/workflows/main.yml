@@ -41,4 +41,5 @@ jobs:
           dockerhub_repo: ${{ matrix.dockerhub_repo }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           dockerfile: ${{ matrix.dockerfile }}
+          version: ${{ steps.version.outputs.version }}
 

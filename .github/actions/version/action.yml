@@ -26,8 +26,10 @@ runs:
 
         if [[ $COMMIT_MSG =~ .*\[no\ bump\].* ]]; then
           echo "version_bump=false" >> $GITHUB_OUTPUT
+          echo "Not bumping version"
         else
           echo "version_bump=true" >> $GITHUB_OUTPUT
+          echo "Bumping version"
         fi
 
     - name: Set version
