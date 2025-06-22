@@ -65,7 +65,7 @@ runs:
         if [[ "${{ steps.check_version_bump.outputs.version_bump }}" == "false" ]]; then
           EXISTING_VERSION=$(grep -oP 'version:\s*\K[0-9]+\.[0-9]+\.[0-9]+' ./.deploy/helm/Chart.yaml | tr -d '[:space:]')
           echo "version=$EXISTING_VERSION" >> $GITHUB_OUTPUT
-          echo "The existing version is "$EXISTING_VERSION"
+          echo "The existing version is $EXISTING_VERSION"
         else
           echo "version=${{ steps.set_version.outputs.version }}" >> $GITHUB_OUTPUT
         fi
