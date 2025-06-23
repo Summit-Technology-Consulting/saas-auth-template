@@ -1,8 +1,7 @@
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 import { toast } from "react-toastify";
-import { AxiosError, AxiosResponse } from "axios";
-import { AxiosRequestConfig } from "axios";
+import { twMerge } from "tailwind-merge";
 import { nextApi } from "./api";
 
 export function cn(...inputs: ClassValue[]) {
@@ -14,7 +13,10 @@ export async function fetch<T>(
   options?: AxiosRequestConfig
 ): Promise<T | null> {
   try {
-    const response: AxiosResponse<T> = await nextApi.get(url, options);
+    const response: AxiosResponse<T> = await nextApi.request({
+      url,
+      ...options,
+    });
 
     if (!response) {
       toast.error("No response received from server");

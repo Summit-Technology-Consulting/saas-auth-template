@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from saas_backend.auth.models import User
 from saas_backend.auth.router import router as auth_router
 from saas_backend.auth.database import Base, engine
+from saas_backend.stripe.router import router as stripe_router
 from saas_backend.auth.user_manager.user_manager import UserManager
 
 _ = load_dotenv()
@@ -27,6 +28,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(auth_router)
+app.include_router(stripe_router)
 
 app.add_middleware(
     CORSMiddleware,

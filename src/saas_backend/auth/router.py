@@ -1,6 +1,7 @@
 # STL
 import uuid
 import hashlib
+import traceback
 from datetime import timedelta
 
 # PDM
@@ -14,6 +15,7 @@ from fastapi.responses import JSONResponse
 # LOCAL
 from saas_backend.logger import LOG
 from saas_backend.auth.models import User, APIKey, BaseUser
+from saas_backend.stripe.utils import get_or_create_stripe_customer
 from saas_backend.auth.database import get_db
 from saas_backend.auth.constants import ACCESS_TOKEN_EXPIRE_MINUTES
 from saas_backend.auth.jwt_handler import JwtHandler
@@ -81,10 +83,17 @@ async def register_user(user: BaseUser, db: Session = Depends(get_db)):
 
         db.add(new_user)
         db.commit()
+
     except sqlalchemy.exc.IntegrityError:
         raise HTTPException(
             status_code=400, detail=str("User with this username already exists")
         )
+
+    try:
+        get_or_create_stripe_customer(db, new_user)
+    except Exception:
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=str("An error occured in Stripe."))
 
     return {"message": "User registered successfully"}
 

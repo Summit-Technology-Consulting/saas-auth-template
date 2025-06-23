@@ -4,6 +4,7 @@ from typing import final
 # PDM
 from pydantic import BaseModel
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 
 # LOCAL
 from saas_backend.auth.database import Base
@@ -23,6 +24,19 @@ class User(Base):
     hashed_password = Column(String)
     credits = Column(Integer, default=1)
     api_key_id = Column(Integer, ForeignKey("api_key.id"))
+
+    stripe = relationship("StripeMetadata", back_populates="user", uselist=False)
+
+
+@final
+class StripeMetadata(Base):
+    __tablename__ = "stripe_metadata"
+    id = Column(String, primary_key=True, index=True, unique=True)  # stripe_customer_id
+    user_id = Column(Integer, ForeignKey("user.id"), unique=True, index=True)
+    subcription_plan = Column(String, index=True)
+    stripe_subscription_id = Column(String, nullable=True)
+
+    user = relationship("User", back_populates="stripe")
 
 
 @final
