@@ -8,9 +8,10 @@ from fastapi.responses import JSONResponse
 
 # LOCAL
 from saas_backend.constants import STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET
-from saas_backend.auth.models import User
+from saas_backend.auth.models import User, StripeMetadata
 from saas_backend.stripe.utils import get_or_create_stripe_customer
 from saas_backend.auth.database import get_db
+from saas_backend.stripe.stripe import update_user_plan_to_pro
 from saas_backend.auth.user_manager.user_manager import UserManager
 
 router = APIRouter(prefix="/stripe")
@@ -42,7 +43,7 @@ def create_checkout_session(
 
 
 @router.post("/webhook")
-async def stripe_webhook(request: Request):
+async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
     endpoint_secret = STRIPE_WEBHOOK_SECRET
@@ -52,8 +53,57 @@ async def stripe_webhook(request: Request):
     except stripe.SignatureVerificationError:
         raise HTTPException(status_code=400, detail="Invalid signature")
 
-    if event["type"] == "checkout.session.completed":
-        session = event["data"]["object"]
-        # Lookup session.customer in DB and mark user as paid
+    event_type = event["type"]
 
-    return {"status": "success"}
+    # Subscription Started
+    if event_type == "customer.subscription.created":
+        subscription = event["data"]["object"]
+        stripe_customer_id = subscription.get("customer")
+        subscription_id = subscription.get("id")
+        current_period_end = subscription["items"]["data"][0]["current_period_end"]
+
+        expires_at = current_period_end if current_period_end else None
+
+        subscription_data = {
+            "subscription_id": subscription_id,
+            "expires_at": expires_at,
+        }
+
+        if update_user_plan_to_pro(stripe_customer_id, subscription_data, db):
+            return JSONResponse(content={"status": "created"})
+
+    # Subscription Renewed (Payment Success)
+    elif event_type == "invoice.payment_succeeded":
+        invoice = event["data"]["object"]
+        if invoice.get("billing_reason") == "subscription_cycle":
+            stripe_customer_id = invoice.get("customer")
+            subscription_id = invoice.get("subscription")
+            current_period_end = invoice.get("lines")["data"][0]["period"]["end"]
+
+            subscription_data = {
+                "subscription_id": subscription_id,
+                "expires_at": current_period_end,
+            }
+
+            if update_user_plan_to_pro(stripe_customer_id, subscription_data, db):
+                return JSONResponse(content={"status": "renewed"})
+
+    # Subscription Cancelled
+    elif event_type == "customer.subscription.deleted":
+        subscription = event["data"]["object"]
+        stripe_customer_id = subscription.get("customer")
+
+        # Optional: also clear subscription_id or plan if needed
+        stripe_meta = (
+            db.query(StripeMetadata)
+            .filter(StripeMetadata.id == stripe_customer_id)
+            .first()
+        )
+        if stripe_meta:
+            stripe_meta.expires_at = 0  # type: ignore
+            stripe_meta.subcription_plan = "free"  # type: ignore
+            stripe_meta.stripe_subscription_id = None  # type: ignore
+            db.commit()
+            return JSONResponse(content={"status": "cancelled"})
+
+    return JSONResponse(content={"status": "ignored"})

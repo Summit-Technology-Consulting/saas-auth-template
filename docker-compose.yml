@@ -18,3 +18,15 @@ services:
     env_file: ./frontend/.env
     ports:
       - 3000:3000
+
+  stripe:
+    image: stripe/stripe-cli
+    container_name: stripe-cli
+    entrypoint: stripe
+    command: listen --forward-to http://saas-backend:8000/stripe/webhook
+    depends_on:
+      - saas-backend
+    environment:
+      STRIPE_API_KEY: ${STRIPE_SECRET_KEY}
+
+    restart: unless-stopped

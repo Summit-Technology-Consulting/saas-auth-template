@@ -3,6 +3,7 @@ services:
     env_file: .env
     volumes:
       - ./src:/app/src
+      - ./data:/app/data
 
   saas-frontend:
     env_file: ./frontend/.env

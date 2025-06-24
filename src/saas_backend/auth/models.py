@@ -35,6 +35,7 @@ class StripeMetadata(Base):
     user_id = Column(Integer, ForeignKey("user.id"), unique=True, index=True)
     subcription_plan = Column(String, index=True)
     stripe_subscription_id = Column(String, nullable=True)
+    expires_at = Column(Integer, index=True)
 
     user = relationship("User", back_populates="stripe")
 

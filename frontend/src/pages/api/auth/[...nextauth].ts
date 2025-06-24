@@ -7,7 +7,8 @@ interface ExtendedUser extends NextAuthUser {
   username: string;
 }
 
-const TOKEN_EXPIRY = Number(process.env.ACCESS_TOKEN_EXPIRY_MINUTES) || 120;
+const TOKEN_EXPIRY =
+  Number(process.env.ACCESS_TOKEN_EXPIRY_MINUTES) || 60 * 120;
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "",

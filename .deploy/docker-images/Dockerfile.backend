@@ -29,7 +29,4 @@ COPY src ./src
 
 RUN pdm install
 
-RUN mkdir -p ./data
-RUN touch ./data/database.db
-
 COPY .scripts/start.sh ./start.sh

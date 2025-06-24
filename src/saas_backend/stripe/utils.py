@@ -7,7 +7,7 @@ from saas_backend.auth.models import User, StripeMetadata
 
 
 def get_or_create_stripe_customer(
-    db: Session, user: User, plan: str = "pro"
+    db: Session, user: User, plan: str = "free"
 ) -> StripeMetadata:
     metadata = db.query(StripeMetadata).filter_by(user_id=user.id).first()
 
