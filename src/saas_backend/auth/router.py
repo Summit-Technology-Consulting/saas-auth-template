@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 
 # LOCAL
 from saas_backend.logger import LOG
-from saas_backend.auth.models import User, APIKey, BaseUser
+from saas_backend.auth.models import User, APIKey, BaseUser, StripeMetadata
 from saas_backend.stripe.utils import get_or_create_stripe_customer
 from saas_backend.auth.database import get_db
 from saas_backend.auth.constants import ACCESS_TOKEN_EXPIRE_MINUTES
@@ -96,6 +96,33 @@ async def register_user(user: BaseUser, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str("An error occured in Stripe."))
 
     return {"message": "User registered successfully"}
+
+
+@router.get("/profile")
+async def get_user_profile(
+    user: User = Depends(UserManager.get_user_from_header),
+    db: Session = Depends(get_db),
+):
+    """Get user profile data including plan information"""
+    stripe_metadata = (
+        db.query(StripeMetadata).filter(StripeMetadata.user_id == user.id).first()
+    )
+
+    profile_data = {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "credits": user.credits,
+        "plan": {
+            "name": stripe_metadata.subcription_plan if stripe_metadata else "free",
+            "subscription_id": (
+                stripe_metadata.stripe_subscription_id if stripe_metadata else None
+            ),
+            "expires_at": stripe_metadata.expires_at if stripe_metadata else None,
+        },
+    }
+
+    return profile_data
 
 
 @router.put("/api-key")

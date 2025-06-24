@@ -5,12 +5,11 @@ import { fetch } from "@/lib/utils";
 export const SubscribeButton = () => {
   const handleSubscribe = async () => {
     const res = await fetch<{ url: string }>(
-      "/stripe/create-checkout-session",
+      "/api/stripe/create-checkout-session",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         data: {
-          user_id: "my-user-id",
           price_id: "price_1RczM0PYf612M0izKQJCFrqc",
         },
       }

@@ -1,11 +1,11 @@
+import { Menu, Settings, X } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
 import AuthButton from "../auth/button";
 import AuthModal from "../auth/login-modal";
-import { useSession } from "next-auth/react";
 import { CreditBalance } from "./credit-balance";
-import Image from "next/image";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -50,10 +50,17 @@ const Header = () => {
             </button>
           </div>
           {status === "authenticated" && (
-            <div>
+            <div className="flex items-center space-x-4">
               <p className="text-sm text-gray-500">
                 Welcome, {session.user?.username}
               </p>
+              <Link
+                href="/settings"
+                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <Settings className="h-4 w-4 mr-1" />
+                Settings
+              </Link>
             </div>
           )}
           <CreditBalance />
@@ -97,6 +104,15 @@ const Header = () => {
                   >
                     Home
                   </Link>
+                  {status === "authenticated" && (
+                    <Link
+                      href="/settings"
+                      className="text-base font-medium text-gray-900 hover:text-gray-700 flex items-center"
+                    >
+                      <Settings className="h-4 w-4 mr-2" />
+                      Settings
+                    </Link>
+                  )}
                   <Link
                     href="/about"
                     className="text-base font-medium text-gray-900 hover:text-gray-700"
