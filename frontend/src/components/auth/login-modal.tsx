@@ -8,6 +8,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import useUser from "@/hooks/useUser";
+import { Plan } from "@/types/user.types";
 import { getSession, signIn } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -21,6 +22,8 @@ export default function AuthModal({ isOpen, setIsOpen }: AuthModalProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+
   const { updateUser } = useUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,13 +47,16 @@ export default function AuthModal({ isOpen, setIsOpen }: AuthModalProps) {
 
         if (!session?.user) {
           toast.error("Failed to login");
-          return;
         }
 
         updateUser({
           username,
-          creditBalance: session?.user?.startingCredits,
+          id: Number(session?.user.id),
+          creditBalance: session?.user?.startingCredits as number,
+          email: session?.user.email as string,
+          plan: session?.user.plan as Plan,
         });
+
         setIsOpen(false);
         setUsername("");
         setPassword("");
@@ -61,7 +67,7 @@ export default function AuthModal({ isOpen, setIsOpen }: AuthModalProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, email }),
       });
 
       const data = await response.json();
@@ -96,6 +102,18 @@ export default function AuthModal({ isOpen, setIsOpen }: AuthModalProps) {
               required
             />
           </div>
+
+          {!isLogin && (
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+            />
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="password" className="text-black">
               Password

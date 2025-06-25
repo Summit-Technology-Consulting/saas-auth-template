@@ -1,4 +1,3 @@
-import { SubscribeButton } from "@/components/stripe/subscribe-button";
 import { fetch } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
@@ -21,10 +20,5 @@ export const LoggedInUser = () => {
     getUsername();
   }, []);
 
-  return (
-    <div>
-      Your logged in username is: {username}
-      <SubscribeButton />
-    </div>
-  );
+  return <div>Your logged in username is: {username}</div>;
 };

@@ -1,12 +1,13 @@
-import { useSelector, useDispatch } from "react-redux";
-import { setUser, clearUser } from "@/userSlice";
 import { RootState } from "@/store";
+import { User } from "@/types/user.types";
+import { clearUser, setUser } from "@/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const useUser = () => {
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
-  const updateUser = (userData: unknown) => {
+  const updateUser = (userData: Partial<User>) => {
     dispatch(setUser(userData));
   };
 

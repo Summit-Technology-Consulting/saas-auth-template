@@ -13,6 +13,7 @@ from saas_backend.auth.database import Base
 class BaseUser(BaseModel):
     username: str
     password: str
+    email: str
 
 
 @final

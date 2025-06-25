@@ -57,6 +57,8 @@ export const authOptions: NextAuthOptions = {
             id: decoded.id,
             username: decoded.username,
             startingCredits: decoded.credits,
+            email: decoded.email,
+            plan: decoded.plan,
           };
         }
 
@@ -71,6 +73,8 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.username = user.username;
         token.startingCredits = user.startingCredits;
+        token.email = user.email;
+        token.plan = user.plan;
       }
 
       return token;
@@ -82,6 +86,8 @@ export const authOptions: NextAuthOptions = {
           id: token.id as string,
           username: token.username as string,
           startingCredits: token.startingCredits as number,
+          email: token.email,
+          plan: token.plan,
         };
       }
       return session;

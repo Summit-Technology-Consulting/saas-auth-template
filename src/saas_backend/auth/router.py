@@ -1,5 +1,6 @@
 # STL
 import uuid
+import email
 import hashlib
 import traceback
 from datetime import timedelta
@@ -26,9 +27,22 @@ router = APIRouter()
 
 @router.post("/login")
 async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
     user = UserManager.authenticate_user(form_data.username, form_data.password)
+
+    stripe_metadata = (
+        db.query(StripeMetadata).filter(StripeMetadata.user_id == user.id).first()
+    )
+
+    plan = (
+        {
+            "name": stripe_metadata.subcription_plan,
+            "expires_at": stripe_metadata.expires_at,
+        }
+        if stripe_metadata
+        else None
+    )
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = JwtHandler.create_access_token(
@@ -37,6 +51,7 @@ async def login(
             "username": user.username,
             "email": user.email,
             "credits": user.credits,
+            "plan": plan,
         },
         expires_delta=access_token_expires,
     )
@@ -78,6 +93,7 @@ async def register_user(user: BaseUser, db: Session = Depends(get_db)):
     try:
         new_user = User(
             username=user.username,
+            email=user.email,
             hashed_password=hashlib.sha256(user.password.encode()).hexdigest(),
         )
 

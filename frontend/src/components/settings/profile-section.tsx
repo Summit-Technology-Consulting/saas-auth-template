@@ -1,22 +1,11 @@
 "use client";
 
+import { User } from "@/types/user.types";
 import React from "react";
 import styles from "./profile-section.module.css";
 
-interface UserProfile {
-  id: number;
-  username: string;
-  email: string;
-  credits: number;
-  plan: {
-    name: string;
-    subscription_id: string | null;
-    expires_at: number | null;
-  };
-}
-
 interface ProfileSectionProps {
-  profile: UserProfile;
+  profile: User;
 }
 
 const ProfileSection: React.FC<ProfileSectionProps> = ({ profile }) => {

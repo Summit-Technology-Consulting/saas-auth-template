@@ -1,23 +1,12 @@
 "use client";
 
 import { fetch } from "@/lib/utils";
+import { User } from "@/types/user.types";
 import React, { useState } from "react";
 import styles from "./plan-card.module.css";
 
-interface UserProfile {
-  id: number;
-  username: string;
-  email: string;
-  credits: number;
-  plan: {
-    name: string;
-    subscription_id: string | null;
-    expires_at: number | null;
-  };
-}
-
 interface PlanCardProps {
-  profile: UserProfile;
+  profile: User;
 }
 
 const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
