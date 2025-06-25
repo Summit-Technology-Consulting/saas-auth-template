@@ -1,6 +1,5 @@
 # STL
 import uuid
-import email
 import hashlib
 import traceback
 from datetime import timedelta
