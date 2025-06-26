@@ -65,7 +65,6 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
   };
 
   const isProPlan = profile.plan.name === "pro";
-  const hasActiveSubscription = !!profile.plan.subscription_id;
 
   return (
     <div className={styles.card}>

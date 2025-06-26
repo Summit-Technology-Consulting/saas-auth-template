@@ -1,7 +1,6 @@
 import { useFetchUserProfile } from "@/hooks/use-fetch-user-profile";
 import useUser from "@/hooks/useUser";
 import { User } from "@/types/user.types";
-import clsx from "clsx";
 import { Check, Home, Settings, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";

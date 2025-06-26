@@ -34,7 +34,6 @@ const Cancel = () => {
       setState("error");
       setErrorMessage("Failed to fetch profile");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
   const handleCancelSubscription = async () => {
@@ -183,13 +182,13 @@ const Cancel = () => {
       </div>
       <h1 className={styles.successTitle}>Subscription Cancelled</h1>
       <p className={styles.successSubtitle}>
-        Your subscription has been cancelled successfully. You'll continue to
-        have access to Pro features until the end of your current billing
+        Your subscription has been cancelled successfully. You&apos;l continue
+        to have access to Pro features until the end of your current billing
         period.
       </p>
 
       <div className={styles.infoBox}>
-        <h4 className={styles.infoTitle}>What's next:</h4>
+        <h4 className={styles.infoTitle}>What&apos;s next:</h4>
         <ul className={styles.infoList}>
           <li>
             Your account will be downgraded to Free at the end of the current
