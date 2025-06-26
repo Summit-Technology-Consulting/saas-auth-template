@@ -1,5 +1,7 @@
-const Cancel = () => {
-  return <div>Cancel</div>;
+import Cancel from "@/components/pages/cancel";
+
+const CancelPage = () => {
+  return <Cancel />;
 };
 
-export default Cancel;
+export default CancelPage;

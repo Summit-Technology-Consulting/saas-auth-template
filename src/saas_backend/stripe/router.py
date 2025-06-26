@@ -1,3 +1,6 @@
+# STL
+import traceback
+
 # PDM
 import stripe
 import stripe.error
@@ -40,6 +43,51 @@ def create_checkout_session(
     )
 
     return JSONResponse(content={"url": session.url})
+
+
+@router.post("/cancel-subscription")
+def cancel_subscription(
+    user: User = Depends(UserManager.get_user_from_header),
+    db: Session = Depends(get_db),
+):
+    """Cancel the user's active subscription"""
+    try:
+        # Get user's stripe metadata
+        stripe_metadata = (
+            db.query(StripeMetadata).filter(StripeMetadata.user_id == user.id).first()
+        )
+
+        if not stripe_metadata or not stripe_metadata.stripe_subscription_id:
+            raise HTTPException(
+                status_code=400, detail="No active subscription found to cancel"
+            )
+
+        # Cancel the subscription in Stripe
+        subscription = stripe.Subscription.modify(
+            stripe_metadata.stripe_subscription_id, cancel_at_period_end=True
+        )
+
+        print(subscription)
+
+        # Update the user's plan to free
+        stripe_metadata.subcription_plan = "free"  # type: ignore
+        stripe_metadata.stripe_subscription_id = None  # type: ignore
+        stripe_metadata.expires_at = None  # type: ignore
+        db.commit()
+
+        return JSONResponse(
+            content={
+                "message": "Subscription cancelled successfully",
+            }
+        )
+
+    except Exception as e:
+        if "stripe" in str(e).lower():
+            traceback.print_exc()
+            raise HTTPException(status_code=400, detail=f"Stripe error: {str(e)}")
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @router.post("/webhook")

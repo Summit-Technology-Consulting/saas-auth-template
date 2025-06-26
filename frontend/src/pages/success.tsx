@@ -1,5 +1,7 @@
-const Success = () => {
-  return <div>success</div>;
+import Success from "@/components/pages/success";
+
+const SuccessPage = () => {
+  return <Success />;
 };
 
-export default Success;
+export default SuccessPage;

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useState } from "react";
 import AuthButton from "../auth/button";
 import AuthModal from "../auth/login-modal";
-import { CreditBalance } from "./credit-balance";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -63,7 +62,6 @@ const Header = () => {
               </Link>
             </div>
           )}
-          <CreditBalance />
           <nav className="hidden md:flex space-x-10">
             <AuthButton toggleAuthModal={toggleAuthModal} />
           </nav>

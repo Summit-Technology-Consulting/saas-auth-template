@@ -2,6 +2,7 @@
 
 import { fetch } from "@/lib/utils";
 import { User } from "@/types/user.types";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import styles from "./plan-card.module.css";
 
@@ -12,6 +13,7 @@ interface PlanCardProps {
 const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleUpgrade = async () => {
     setLoading(true);
@@ -52,8 +54,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
     setError(null);
 
     try {
-      // This would need a backend endpoint to handle subscription cancellation
-      // For now, we'll just show an error
+      router.push("/cancel");
       setError("Subscription cancellation not implemented yet");
     } catch (err) {
       setError("Failed to cancel subscription");
