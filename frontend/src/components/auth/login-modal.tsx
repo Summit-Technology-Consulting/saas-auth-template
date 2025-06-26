@@ -104,14 +104,19 @@ export default function AuthModal({ isOpen, setIsOpen }: AuthModalProps) {
           </div>
 
           {!isLogin && (
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-black">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+              />
+            </div>
           )}
 
           <div className="space-y-2">
@@ -126,6 +131,7 @@ export default function AuthModal({ isOpen, setIsOpen }: AuthModalProps) {
               required
             />
           </div>
+
           <div className="flex justify-between">
             <Button type="submit">{isLogin ? "Login" : "Register"}</Button>
             <Button
