@@ -38,6 +38,7 @@ async def login(
         {
             "name": stripe_metadata.subcription_plan,
             "expires_at": stripe_metadata.expires_at,
+            "subscription_id": stripe_metadata.stripe_subscription_id,
         }
         if stripe_metadata
         else None

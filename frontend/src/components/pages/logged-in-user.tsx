@@ -1,11 +1,14 @@
-import { fetch } from "@/lib/utils";
+import { useFetch } from "@/hooks/use-fetch-from-server";
 import {
   Activity,
   ArrowRight,
   BarChart3,
+  CheckCircle,
   CreditCard,
+  Crown,
   Settings,
   Users,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -15,8 +18,15 @@ type LoggedInResponse = {
   username: string;
 };
 
+type PremiumUserReponse = {
+  is_premium: boolean;
+};
+
 export const LoggedInUser = () => {
+  const { fetch } = useFetch();
   const [username, setUsername] = useState("");
+  const [isPremiumUser, setIsPremiumUser] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const getUsername = async () => {
     const response = await fetch<LoggedInResponse>("/requires-auth");
@@ -26,8 +36,29 @@ export const LoggedInUser = () => {
     }
   };
 
+  const getPremiumRoute = async () => {
+    try {
+      const response = await fetch<PremiumUserReponse>("/pro/premium");
+
+      if (response) {
+        setIsPremiumUser(response.is_premium);
+      } else {
+        setIsPremiumUser(false);
+      }
+    } catch (error) {
+      console.error("Error fetching premium status:", error);
+      setIsPremiumUser(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    getUsername();
+    const initializeData = async () => {
+      await Promise.all([getUsername(), getPremiumRoute()]);
+    };
+
+    initializeData();
   }, []);
 
   const stats = [
@@ -91,6 +122,54 @@ export const LoggedInUser = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Premium Status Section */}
+      <section className={styles.premiumSection}>
+        <div className={styles.premiumContainer}>
+          <div className={styles.premiumCard}>
+            <div className={styles.premiumHeader}>
+              <Crown className={styles.premiumIcon} />
+              <h3 className={styles.premiumTitle}>Premium Status</h3>
+            </div>
+            <div className={styles.premiumContent}>
+              {isLoading ? (
+                <div className={styles.premiumLoading}>
+                  <div className={styles.loadingSpinner}></div>
+                  <span>Checking premium status...</span>
+                </div>
+              ) : isPremiumUser ? (
+                <div className={styles.premiumActive}>
+                  <CheckCircle className={styles.premiumCheckIcon} />
+                  <div className={styles.premiumText}>
+                    <span className={styles.premiumStatus}>
+                      Active Premium User
+                    </span>
+                    <span className={styles.premiumDescription}>
+                      You have access to all premium features
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.premiumInactive}>
+                  <XCircle className={styles.premiumXIcon} />
+                  <div className={styles.premiumText}>
+                    <span className={styles.premiumStatus}>Free User</span>
+                    <span className={styles.premiumDescription}>
+                      Upgrade to unlock premium features
+                    </span>
+                  </div>
+                  <Link href="/settings">
+                    <button className={styles.upgradeButton}>
+                      Upgrade to Premium
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>

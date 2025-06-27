@@ -10,7 +10,7 @@ type CancelState = "confirm" | "loading" | "success" | "error";
 
 const Cancel = () => {
   const { fetchProfile, loading, error, profile } = useFetchUserProfile();
-  const { updateUser } = useUser();
+  const { user, updateUser } = useUser();
   const [state, setState] = useState<CancelState>("confirm");
   const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -61,9 +61,8 @@ const Cancel = () => {
       // Update user state
       const userData: Partial<User> = {
         plan: {
-          name: "free",
-          subscription_id: null,
-          expires_at: null,
+          ...user.plan,
+          name: "canceled",
         },
       };
       updateUser(userData);

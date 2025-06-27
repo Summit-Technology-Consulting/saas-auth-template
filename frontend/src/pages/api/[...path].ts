@@ -1,6 +1,6 @@
+import axios, { AxiosError, AxiosHeaders } from "axios";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
-import axios, { AxiosError, AxiosHeaders } from "axios";
 
 const api = axios.create({
   baseURL: process.env.API_URL,
@@ -77,7 +77,7 @@ export default async function handler(
           console.error(error.response?.data.detail);
           res
             .status(error.response?.status)
-            .send({ error: `Error: ${error.response?.data.detail}` });
+            .send({ error: error.response?.data.detail });
           return;
         }
       }

@@ -10,7 +10,8 @@ export function cn(...inputs: ClassValue[]) {
 
 export async function fetch<T>(
   url: string,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
+  onSubscriptionExpired?: () => void
 ): Promise<T | null> {
   try {
     const response: AxiosResponse<T> = await nextApi.request({
@@ -31,8 +32,29 @@ export async function fetch<T>(
     return response.data;
   } catch (error: unknown) {
     if (error instanceof AxiosError) {
+      console.error(error?.response?.data);
+
       if (error.response?.status === 307) {
         window.location.href = error.response.data.url;
+        return null;
+      } else {
+        console.error(JSON.stringify(error.response?.data.error, null, 2));
+      }
+
+      if (error.response?.status && error.response?.status >= 400) {
+        const errorMessage = error.response?.data.error;
+
+        toast.error(errorMessage);
+
+        if (
+          typeof errorMessage === "string" &&
+          /subscription has expired/i.test(errorMessage)
+        ) {
+          onSubscriptionExpired?.();
+
+          return null;
+        }
+
         return null;
       } else {
         console.error(JSON.stringify(error.response?.data.error, null, 2));

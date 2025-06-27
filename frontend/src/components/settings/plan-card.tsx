@@ -1,9 +1,11 @@
 "use client";
 
+import useUser from "@/hooks/useUser";
 import { fetch } from "@/lib/utils";
 import { User } from "@/types/user.types";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
 import styles from "./plan-card.module.css";
 
 interface PlanCardProps {
@@ -14,13 +16,14 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { user, updateUser } = useUser();
 
   const handleUpgrade = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const res = await fetch<{ url: string }>(
+      const res = await fetch<{ url: string; message?: string }>(
         "/stripe/create-checkout-session",
         {
           method: "POST",
@@ -35,6 +38,11 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
         window.location.href = res.url;
       } else {
         setError("Failed to create checkout session");
+      }
+
+      if (res && res.message) {
+        toast.success(res.message);
+        updateUser({ plan: { ...user.plan, name: "pro" } });
       }
     } catch (err) {
       setError("Failed to upgrade plan");
@@ -64,7 +72,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
     }
   };
 
-  const isProPlan = profile.plan.name === "pro";
+  const isProPlan = profile.plan.name != "free";
 
   return (
     <div className={styles.card}>
@@ -92,7 +100,9 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
             <div className={styles.field}>
               <label className={styles.label}>Subscription Status</label>
               <div className={styles.value}>
-                <span className={styles.status}>Active</span>
+                <span className={styles.status}>
+                  {profile.plan.name === "pro" ? "Active" : "Cancelling Soon"}
+                </span>
               </div>
             </div>
 
@@ -117,13 +127,15 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
         {error && <div className={styles.error}>{error}</div>}
 
         <div className={styles.actions}>
-          {!isProPlan ? (
+          {!isProPlan || profile.plan.name == "canceled" ? (
             <button
               onClick={handleUpgrade}
               disabled={loading}
               className={styles.upgradeButton}
             >
-              {loading ? "Processing..." : "Upgrade to Pro"}
+              {profile.plan.name !== "canceled"
+                ? "Upgrade to pro"
+                : "Reactivate Subscription"}
             </button>
           ) : (
             <button

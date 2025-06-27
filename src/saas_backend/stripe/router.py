@@ -14,7 +14,10 @@ from saas_backend.constants import STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET
 from saas_backend.auth.models import User, StripeMetadata
 from saas_backend.stripe.utils import get_or_create_stripe_customer
 from saas_backend.auth.database import get_db
-from saas_backend.stripe.stripe import update_user_plan_to_pro
+from saas_backend.stripe.stripe import (
+    update_user_plan_to_pro,
+    reactivate_user_subscription,
+)
 from saas_backend.auth.user_manager.user_manager import UserManager
 
 router = APIRouter(prefix="/stripe")
@@ -33,6 +36,30 @@ def create_checkout_session(
 ):
     stripe_customer = get_or_create_stripe_customer(db, user)
 
+    subscriptions = stripe.Subscription.list(
+        customer=str(stripe_customer.id),
+        status="all",
+        expand=["data.default_payment_method"],
+    )
+
+    for sub in subscriptions.data:
+        if sub.status == "active":
+            if sub.cancel_at_period_end:
+                # Reactivate the subscription
+                stripe.Subscription.modify(sub.id, cancel_at_period_end=False)
+                reactivate_user_subscription(user.id, db)
+                return JSONResponse(content={"message": "Subscription reactivated"})
+            else:
+                # Already subscribed
+                raise HTTPException(
+                    status_code=400, detail="You already have an active subscription."
+                )
+        elif sub.status == "trialing":
+            raise HTTPException(
+                status_code=400, detail="You already have a trialing subscription."
+            )
+
+    # No valid subscription, proceed to create a new checkout session
     session = stripe.checkout.Session.create(
         customer=str(stripe_customer.id),
         payment_method_types=["card"],
@@ -70,9 +97,7 @@ def cancel_subscription(
         print(subscription)
 
         # Update the user's plan to free
-        stripe_metadata.subcription_plan = "free"  # type: ignore
-        stripe_metadata.stripe_subscription_id = None  # type: ignore
-        stripe_metadata.expires_at = None  # type: ignore
+        stripe_metadata.subcription_plan = "canceled"  # type: ignore
         db.commit()
 
         return JSONResponse(

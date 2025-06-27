@@ -10,6 +10,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
 # LOCAL
+from saas_backend.pro.router import router as pro_router
 from saas_backend.auth.models import User
 from saas_backend.auth.router import router as auth_router
 from saas_backend.auth.database import Base, engine
@@ -29,6 +30,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(auth_router)
 app.include_router(stripe_router)
+app.include_router(pro_router)
 
 app.add_middleware(
     CORSMiddleware,
