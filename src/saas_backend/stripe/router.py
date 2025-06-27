@@ -90,11 +90,9 @@ def cancel_subscription(
             )
 
         # Cancel the subscription in Stripe
-        subscription = stripe.Subscription.modify(
+        stripe.Subscription.modify(
             stripe_metadata.stripe_subscription_id, cancel_at_period_end=True
         )
-
-        print(subscription)
 
         # Update the user's plan to free
         stripe_metadata.subcription_plan = "canceled"  # type: ignore
