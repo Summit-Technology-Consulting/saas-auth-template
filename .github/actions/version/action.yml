@@ -37,7 +37,7 @@ runs:
       shell: bash
       id: determine_version_type
       run: |
-        VERSION_TYPE=$(.scripts/determine_version_type.sh)
+        VERSION_TYPE=$(./.scripts/check-bump-type.sh)
         echo "VERSION_TYPE=$VERSION_TYPE" >> $GITHUB_ENV
 
     - name: Set version
