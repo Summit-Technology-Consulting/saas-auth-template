@@ -5,7 +5,7 @@ COMPOSE_DEV_FILES := -f docker-compose.yml -f docker-compose.dev.yml
 .DEFAULT_GOAL := help
 
 # Targets
-.PHONY: help build up down up-dev
+.PHONY: help build up down up-dev pytest
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -21,3 +21,9 @@ down: ## Stop and remove containers, networks, and volumes
 
 up-dev: ## Start containers using dev override compose file
 	docker compose $(COMPOSE_DEV_FILES) up -d --force-recreate
+
+pytest: ## Run pytest
+	PYTHONPATH=. pdm run pytest -v -ra src/saas_backend/tests
+
+
+

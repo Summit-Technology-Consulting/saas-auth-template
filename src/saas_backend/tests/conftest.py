@@ -62,3 +62,9 @@ def setup_database():
 
     yield
     Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture(autouse=True)
+def mock_stripe_enabled_false():
+    with patch("saas_backend.auth.router.STRIPE_ENABLED", False):
+        yield

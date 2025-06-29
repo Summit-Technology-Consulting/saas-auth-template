@@ -1,25 +1,38 @@
-from freezegun import freeze_time
-from saas_backend.tests.conftest import client
-
-from unittest.mock import patch
+# STL
 import uuid
+from unittest.mock import patch
 
-from saas_backend.tests.utils.user import create_api_key, login, register
+# PDM
+from freezegun import freeze_time
+
+# LOCAL
+from saas_backend.tests.conftest import client
+from saas_backend.tests.utils.user import login, register, create_api_key
 
 
 class TestRegister:
     def test_register_user(self):
         response = client.post(
-            "/register", json={"username": "test_register_user", "password": "test"}
+            "/register",
+            json={
+                "username": "test_register_user",
+                "password": "test",
+                "email": "test_email",
+            },
         )
 
         assert response.status_code == 200
         assert response.json() == {"message": "User registered successfully"}
 
     def test_failed_register_user(self):
-        register(client, "test_register_user", "test")
+        register(client, "test_register_user", "test", "test_email")
         response = client.post(
-            "/register", json={"username": "test_register_user", "password": "test"}
+            "/register",
+            json={
+                "username": "test_register_user",
+                "password": "test",
+                "email": "test_email",
+            },
         )
         assert response.status_code == 400
         assert response.json() == {"detail": "User with this username already exists"}
@@ -27,7 +40,7 @@ class TestRegister:
 
 class TestLogin:
     def test_login(self):
-        register(client, "test_login_user", "test")
+        register(client, "test_login_user", "test", "test_email")
         response = client.post(
             "/login", data={"username": "test_login_user", "password": "test"}
         )
@@ -35,7 +48,7 @@ class TestLogin:
         assert response.json() == {"message": "User logged in successfully"}
 
     def test_failed_login(self):
-        register(client, "test_failed_login_user", "test")
+        register(client, "test_failed_login_user", "test", "test_email")
         response = client.post(
             "/login", data={"username": "test_failed_login_user", "password": "wrong"}
         )
@@ -46,7 +59,7 @@ class TestLogin:
 @freeze_time("2023-01-01")
 class TestApiKey:
     def test_create_api_key(self):
-        register(client, "test_create_api_key_user", "test")
+        register(client, "test_create_api_key_user", "test", "test_email")
         response = client.post(
             "/login",
             data={"username": "test_create_api_key_user", "password": "test"},
@@ -68,7 +81,7 @@ class TestApiKey:
 
     def test_get_api_key(self):
         username = "test_get_api_key_user"
-        register(client, username, "test")
+        register(client, username, "test", "test_email")
         api_key = create_api_key(client, username, "test")
         access_token = login(client, username, "test")
 
@@ -84,7 +97,7 @@ class TestApiKey:
 
     def test_delete_api_key(self):
         username = "test_delete_api_key_user"
-        register(client, username, "test")
+        register(client, username, "test", "test_email")
         _ = create_api_key(client, username, "test")
         access_token = login(client, username, "test")
 
@@ -97,7 +110,7 @@ class TestApiKey:
 
     def test_failed_delete_api_key(self):
         username = "test_failed_delete_api_key_user"
-        register(client, username, "test")
+        register(client, username, "test", "test_email")
         access_token = login(client, username, "test")
 
         response = client.delete(
