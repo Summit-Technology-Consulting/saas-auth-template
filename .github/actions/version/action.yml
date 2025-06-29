@@ -32,6 +32,14 @@ runs:
           echo "Bumping version"
         fi
 
+    - name: Determine version type
+      if: steps.check_version_bump.outputs.version_bump != 'false'
+      shell: bash
+      id: determine_version_type
+      run: |
+        VERSION_TYPE=$(.scripts/determine_version_type.sh)
+        echo "VERSION_TYPE=$VERSION_TYPE" >> $GITHUB_ENV
+
     - name: Set version
       if: steps.check_version_bump.outputs.version_bump != 'false'
       id: set_version
