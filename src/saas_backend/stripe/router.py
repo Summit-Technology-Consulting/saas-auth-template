@@ -10,7 +10,11 @@ from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 
 # LOCAL
-from saas_backend.constants import STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET
+from saas_backend.constants import (
+    STRIPE_API_KEY,
+    FRONTEND_BASE_URL,
+    STRIPE_WEBHOOK_SECRET,
+)
 from saas_backend.auth.models import User, StripeMetadata
 from saas_backend.stripe.utils import get_or_create_stripe_customer
 from saas_backend.auth.database import get_db
@@ -65,8 +69,8 @@ def create_checkout_session(
         payment_method_types=["card"],
         line_items=[{"price": request.price_id, "quantity": 1}],
         mode="subscription",
-        success_url="http://localhost:3000/success",
-        cancel_url="http://localhost:3000/cancel",
+        success_url=f"{FRONTEND_BASE_URL}/success",
+        cancel_url=f"{FRONTEND_BASE_URL}/cancel",
     )
 
     return JSONResponse(content={"url": session.url})

@@ -1,6 +1,8 @@
 "use client";
 
+import useUser from "@/hooks/useUser";
 import { User } from "@/types/user.types";
+import clsx from "clsx";
 import React from "react";
 import styles from "./profile-section.module.css";
 
@@ -9,6 +11,7 @@ interface ProfileSectionProps {
 }
 
 const ProfileSection: React.FC<ProfileSectionProps> = ({ profile }) => {
+  const { isCanceled } = useUser();
   const formatDate = (timestamp: number | null) => {
     if (!timestamp) return "N/A";
     return new Date(timestamp * 1000).toLocaleDateString("en-US", {
@@ -39,7 +42,11 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ profile }) => {
         <div className={styles.field}>
           <label className={styles.label}>Current Plan</label>
           <div className={styles.value}>
-            <span className={`${styles.plan} ${styles[profile.plan.name]}`}>
+            <span
+              className={clsx(`${styles.plan} ${styles[profile.plan.name]}`, {
+                canceled: isCanceled,
+              })}
+            >
               {profile.plan.name.charAt(0).toUpperCase() +
                 profile.plan.name.slice(1)}
             </span>

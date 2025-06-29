@@ -3,6 +3,7 @@
 import useUser from "@/hooks/useUser";
 import { fetch } from "@/lib/utils";
 import { User } from "@/types/user.types";
+import clsx from "clsx";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
@@ -16,7 +17,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { user, updateUser } = useUser();
+  const { user, updateUser, isCanceled } = useUser();
 
   const handleUpgrade = async () => {
     setLoading(true);
@@ -36,8 +37,6 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
 
       if (res && res.url) {
         window.location.href = res.url;
-      } else {
-        setError("Failed to create checkout session");
       }
 
       if (res && res.message) {
@@ -63,7 +62,6 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
 
     try {
       router.push("/cancel");
-      setError("Subscription cancellation not implemented yet");
     } catch (err) {
       setError("Failed to cancel subscription");
       console.error("Error canceling subscription:", err);
@@ -100,13 +98,17 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
             <div className={styles.field}>
               <label className={styles.label}>Subscription Status</label>
               <div className={styles.value}>
-                <span className={styles.status}>
+                <span
+                  className={clsx(styles.status, {
+                    canceled: isCanceled,
+                  })}
+                >
                   {profile.plan.name === "pro" ? "Active" : "Cancelling Soon"}
                 </span>
               </div>
             </div>
 
-            {profile.plan.expires_at && (
+            {profile.plan.expires_at && !isCanceled && (
               <div className={styles.field}>
                 <label className={styles.label}>Next Billing Date</label>
                 <div className={styles.value}>

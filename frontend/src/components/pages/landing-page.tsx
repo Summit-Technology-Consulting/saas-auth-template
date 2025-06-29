@@ -125,8 +125,8 @@ export default function LandingPage() {
               Powerful features to grow your business
             </p>
             <p className={styles.featuresDescription}>
-              Our platform provides all the tools you need to succeed in today's
-              competitive market.
+              Our platform provides all the tools you need to succeed in
+              today&apos;s competitive market.
             </p>
           </div>
           <div className={styles.featuresGrid}>
@@ -153,8 +153,8 @@ export default function LandingPage() {
           <div className={styles.pricingHeader}>
             <h2 className={styles.pricingTitle}>Simple, transparent pricing</h2>
             <p className={styles.pricingDescription}>
-              Choose the plan that's right for you. All plans include a 14-day
-              free trial.
+              Choose the plan that&apos;s right for you. All plans include a
+              14-day free trial.
             </p>
           </div>
           <div className={styles.pricingGrid}>
