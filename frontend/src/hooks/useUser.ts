@@ -8,6 +8,7 @@ const useUser = () => {
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
+  const [isProPlan, setIsProPlan] = useState(user.plan.name != "free");
   const [isCanceled, setIsCanceled] = useState(user.plan.name === "canceled");
 
   const updateUser = (userData: Partial<User>) => {
@@ -19,6 +20,7 @@ const useUser = () => {
   };
 
   useEffect(() => {
+    setIsProPlan(user.plan.name !== "free");
     setIsCanceled(user.plan.name === "canceled");
   }, [user]);
 
@@ -27,6 +29,7 @@ const useUser = () => {
     updateUser,
     clearUserData,
     isCanceled,
+    isProPlan,
   };
 };
 

@@ -17,7 +17,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { user, updateUser, isCanceled } = useUser();
+  const { user, updateUser, isCanceled, isProPlan } = useUser();
 
   const handleUpgrade = async () => {
     setLoading(true);
@@ -30,7 +30,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           data: {
-            price_id: "price_1RczM0PYf612M0izKQJCFrqc",
+            price_id: process.env.NEXT_PUBLIC_PRO_PLAN_PRICE_ID,
           },
         }
       );
@@ -69,8 +69,6 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
       setLoading(false);
     }
   };
-
-  const isProPlan = profile.plan.name != "free";
 
   return (
     <div className={styles.card}>
