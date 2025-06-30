@@ -1,11 +1,14 @@
 # Variables
 COMPOSE_DEV_FILES := -f docker-compose.yml -f docker-compose.dev.yml
 
+# Terraform Directory
+TERRAFORM_DIRECTORY = ./.deploy/terraform
+
 # Default target
 .DEFAULT_GOAL := help
 
 # Targets
-.PHONY: help build up down up-dev pytest
+.PHONY: help build up down up-dev pytest init-terraform apply
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -24,6 +27,21 @@ up-dev: ## Start containers using dev override compose file
 
 pytest: ## Run pytest
 	PYTHONPATH=. pdm run pytest -v -ra src/saas_backend/tests
+
+init-terraform: ## Init terraform 
+	./.scripts/init-terraform.sh
+
+apply: ## Terraform apply
+	terraform -chdir=$(TERRAFORM_DIRECTORY) apply
+
+destroy: ## Terraform destroy
+	terraform -chdir=$(TERRAFORM_DIRECTORY) destroy
+
+destroy-resource: ## Terraform destroy a specific resource
+	terraform -chdir=$(TERRAFORM_DIRECTORY) destroy -target=$(resource)
+
+init-gcp-apis: ## Initialize GCP APIs
+	./.scripts/init-gcp-apis.sh project_id=$(project_id)
 
 
 
