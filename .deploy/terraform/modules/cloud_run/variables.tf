@@ -3,9 +3,14 @@ variable "project_id" {
   type        = string
 }
 
-variable "service_name" {
+variable "frontend_service_name" {
   type    = string
   default = "frontend"
+}
+
+variable "backend_service_name" {
+  type    = string
+  default = "backend"
 }
 
 variable "region" {

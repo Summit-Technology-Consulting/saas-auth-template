@@ -46,23 +46,32 @@ export const authOptions: NextAuthOptions = {
           ?.split(";")[0]
           .split("=")[1];
 
-        const decoded = jwt.verify(
-          access_token || "",
-          process.env.JWT_SECRET || ""
-        ) as unknown as ExtendedUser;
-
-        if (response.ok && access_token) {
-          return {
-            access_token,
-            id: decoded.id,
-            username: decoded.username,
-            startingCredits: decoded.credits,
-            email: decoded.email,
-            plan: decoded.plan,
-          };
+        if (!process.env.JWT_SECRET) {
+          throw new Error("JWT_SECRET is empty.");
         }
 
-        return null;
+        try {
+          const decoded = jwt.verify(
+            access_token || "",
+            process.env.JWT_SECRET || ""
+          ) as unknown as ExtendedUser;
+
+          if (response.ok && access_token) {
+            return {
+              access_token,
+              id: decoded.id,
+              username: decoded.username,
+              startingCredits: decoded.credits,
+              email: decoded.email,
+              plan: decoded.plan,
+            };
+          }
+
+          return null;
+        } catch (error) {
+          console.error(error);
+          return null;
+        }
       },
     }),
   ],
