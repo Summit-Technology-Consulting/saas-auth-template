@@ -25,13 +25,9 @@ const PlanCard: React.FC<PlanCardProps> = ({ profile }) => {
 
     try {
       const res = await fetch<{ url: string; message?: string }>(
-        "/stripe/create-checkout-session",
+        "/stripe/create-checkout-session?name=pro",
         {
-          method: "POST",
           headers: { "Content-Type": "application/json" },
-          data: {
-            price_id: process.env.NEXT_PUBLIC_PRO_PLAN_PRICE_ID,
-          },
         }
       );
 

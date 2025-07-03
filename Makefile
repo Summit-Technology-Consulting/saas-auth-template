@@ -8,7 +8,7 @@ TERRAFORM_DIRECTORY = ./.deploy/terraform
 .DEFAULT_GOAL := help
 
 # Targets
-.PHONY: help build up down up-dev pytest init-terraform apply
+.PHONY: help build up down up-dev pytest init-terraform apply apply-resource destroy destory-resource init-gcp-apis
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -33,6 +33,12 @@ init-terraform: ## Init terraform
 
 apply: ## Terraform apply
 	terraform -chdir=$(TERRAFORM_DIRECTORY) apply
+
+apply-resource: ## Terraform apply (with target)
+	terraform -chdir=$(TERRAFORM_DIRECTORY) apply -target=$(target)
+
+apply-resource: ## Terraform apply (with target)
+	terraform -chdir=$(TERRAFORM_DIRECTORY) apply -target=$(target)
 
 destroy: ## Terraform destroy
 	terraform -chdir=$(TERRAFORM_DIRECTORY) destroy

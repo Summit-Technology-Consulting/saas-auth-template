@@ -55,3 +55,10 @@ class Blacklist(Base):
     id = Column(Integer, primary_key=True, index=True)
     jti = Column(String, unique=True, index=True)
     expires_at = Column(DateTime, index=True)
+
+
+@final
+class PriceId(Base):
+    __tablename__ = "price_id"
+    id = Column(String, primary_key=True, index=True, unique=True)
+    name = Column(String, index=True, unique=True)
