@@ -8,7 +8,8 @@ locals {
     "APP_MODE",
     "STRIPE_SECRET_KEY",
     "STRIPE_WEBHOOK_SECRET",
-    "FRONTEND_BASE_URL"
+    "FRONTEND_BASE_URL",
+    "DATABASE_URL"
   ]
 
   frontend_secret_values = {
@@ -22,7 +23,8 @@ locals {
     STRIPE_SECRET_KEY     = "STRIPE_SECRET_KEY"
     STRIPE_WEBHOOK_SECRET = "STRIPE_WEBHOOK_SECRET",
     FRONTEND_BASE_URL     = "FRONTEND_BASE_URL",
-    PRO_PLAN_PRICE_ID     = "PRO_PLAN_PRICE_ID"
+    PRO_PLAN_PRICE_ID     = "PRO_PLAN_PRICE_ID",
+    DATABASE_URL          = "DATABASE_URL"
   }
 
   shared_secret_values = {
