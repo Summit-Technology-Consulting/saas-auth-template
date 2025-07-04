@@ -3,13 +3,20 @@ output "connection_name" {
   value       = google_sql_database_instance.postgres.connection_name
 }
 
-output "public_ip_address" {
-  description = "The public IPv4 address of the Cloud SQL instance (if public IP is enabled)"
+output "private_ip_address" {
+  description = "The private IPv4 address of the Cloud SQL instance"
   value = (
-    length(google_sql_database_instance.postgres.ip_address) > 0 ?
-    google_sql_database_instance.postgres.ip_address[0].ip_address :
+    length([
+      for ip in google_sql_database_instance.postgres.ip_address : ip
+      if ip.type == "PRIVATE"
+    ]) > 0 ?
+    [
+      for ip in google_sql_database_instance.postgres.ip_address : ip.ip_address
+      if ip.type == "PRIVATE"
+    ][0] :
     null
   )
+  sensitive = true
 }
 
 output "database_name" {

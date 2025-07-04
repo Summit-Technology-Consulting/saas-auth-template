@@ -57,7 +57,7 @@ module "cloud_run" {
   backend_image    = var.backend_image
   frontend_secrets = merge(local.shared_secret_values, local.frontend_secret_values)
   backend_secrets  = merge(local.shared_secret_values, local.backend_secret_values)
-  database_url     = "postgresql+psycopg2://${module.cloud_sql.database_user}:${module.cloud_sql.database_password}@/${module.cloud_sql.database_name}?host=/cloudsql/${module.cloud_sql.connection_name}"
+  database_url     = "postgresql+psycopg2://${module.cloud_sql.database_user}:${module.cloud_sql.database_password}@${module.cloud_sql.private_ip_address}:5432/${module.cloud_sql.database_name}"
   vpc_connector    = module.vpc.connector_id
   depends_on       = [module.secret_manager, module.vpc, module.cloud_sql]
 }
