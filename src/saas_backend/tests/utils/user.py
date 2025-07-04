@@ -1,9 +1,10 @@
+# PDM
 from fastapi.testclient import TestClient
 
 
-def register(client: TestClient, username: str, password: str):
+def register(client: TestClient, username: str, password: str, email: str):
     response = client.post(
-        "/register", json={"username": username, "password": password}
+        "/register", json={"username": username, "password": password, "email": email}
     )
     return response.json()
 

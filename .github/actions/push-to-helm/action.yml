@@ -1,0 +1,65 @@
+name: Publish Helm Chart
+description: Publish a Helm chart to a target repository
+
+inputs:
+  app-repo-token:
+    required: true
+    description: "The token for the target repository"
+  version:
+    required: true
+    description: "The version of the Helm chart"
+  chart_name:
+    required: true
+    description: "The chart name"
+  helm_repo_path:
+    required: true
+    description: "The helm repo path"
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout app repo
+      uses: actions/checkout@v4
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Update Helm chart version
+      run: |
+        sed -i "s/^version: .*/version: ${{ inputs.version }}/" ./.deploy/helm/Chart.yaml
+      shell: bash
+
+    - name: Package Helm chart
+      run: |
+        mkdir -p packaged
+        helm package ./.deploy/helm -d packaged
+      shell: bash
+
+    - name: Clone target Helm repo
+      run: |
+        git clone https://github.com/${{ inputs.helm_repo_path }} target-repo
+        cd target-repo
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git fetch origin gh-pages
+        git checkout gh-pages
+        git pull origin gh-pages
+      shell: bash
+
+    - name: Copy package and update index
+      run: |
+        mkdir -p target-repo/charts/${{ inputs.chart_name }}
+        cp packaged/*.tgz target-repo/charts/${{ inputs.chart_name }}/
+        cd target-repo/charts/${{ inputs.chart_name }}
+        helm repo index . --url https://jaypyles.github.io/helm/charts/${{ inputs.chart_name }}
+      shell: bash
+
+    - name: Commit and push to target repo
+      run: |
+        cd target-repo
+        git add charts/
+        git commit -m "Update ${{ inputs.chart_name }} chart $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes"
+        git push https://x-access-token:${{ inputs.app-repo-token }}@github.com/${{ inputs.helm_repo_path }} gh-pages
+      shell: bash

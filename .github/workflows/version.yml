@@ -1,0 +1,26 @@
+name: Version Helm Chart
+
+on: 
+  workflow_call:
+    secrets:
+      git_token:
+        required: true
+    outputs:
+      version:
+        description: "The new version number"
+        value: ${{ jobs.bump-version.outputs.version }}
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version_bump.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run version bump
+        id: version_bump
+        uses: ./.github/actions/version
+        with:
+          git_token: ${{ secrets.git_token }}

@@ -1,30 +1,44 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { User } from "./types/user.types";
 
-const initialState = {
+const initialState: User = {
   id: null,
-  username: '',
+  username: "",
   creditBalance: 0,
+  email: "",
+  plan: { name: "", subscription_id: null, expires_at: null },
 };
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
-    setUser(state, action) {
-      state.id = action.payload.id;
-      state.username = action.payload.username;
-      state.creditBalance = action.payload.creditBalance;
+    setUser(state, action: PayloadAction<Partial<User>>) {
+      Object.assign(state, action.payload);
     },
-    updateCreditBalance(state, action) {
+    updateCreditBalance(state, action: PayloadAction<number>) {
       state.creditBalance = action.payload;
+    },
+    updatePlan(state, action: PayloadAction<Partial<User["plan"]>>) {
+      Object.assign(state.plan, action.payload);
     },
     clearUser(state) {
       state.id = null;
-      state.username = '';
+      state.username = "";
       state.creditBalance = 0;
+      state.email = "";
+      state.plan = { name: "", subscription_id: null, expires_at: null };
     },
+    resetToInitialState() {},
   },
 });
 
-export const { setUser, updateCreditBalance, clearUser } = userSlice.actions;
+export const {
+  setUser,
+  updateCreditBalance,
+  updatePlan,
+  clearUser,
+  resetToInitialState,
+} = userSlice.actions;
+
 export default userSlice.reducer;

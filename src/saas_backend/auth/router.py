@@ -1,20 +1,25 @@
-import hashlib
-from fastapi import APIRouter, HTTPException, Depends, Header
-from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordRequestForm
-import sqlalchemy
-from sqlalchemy.orm import Session
-from datetime import timedelta
-import jwt
+# STL
 import uuid
+import hashlib
+import traceback
+from datetime import timedelta
 
-from saas_backend.auth.jwt_handler import JwtHandler
-from saas_backend.auth.database import get_db
-from saas_backend.auth.models import User, APIKey, BaseUser
+# PDM
+import jwt
+import sqlalchemy
+from fastapi import Header, Depends, APIRouter, HTTPException
+from sqlalchemy.orm import Session
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
+
+# LOCAL
 from saas_backend.logger import LOG
-from saas_backend.auth.constants import (
-    ACCESS_TOKEN_EXPIRE_MINUTES,
-)
+from saas_backend.constants import STRIPE_ENABLED
+from saas_backend.auth.models import User, APIKey, BaseUser, StripeMetadata
+from saas_backend.stripe.utils import get_or_create_stripe_customer
+from saas_backend.auth.database import get_db
+from saas_backend.auth.constants import ACCESS_TOKEN_EXPIRE_MINUTES
+from saas_backend.auth.jwt_handler import JwtHandler
 from saas_backend.auth.user_manager import UserManager
 
 router = APIRouter()
@@ -22,9 +27,23 @@ router = APIRouter()
 
 @router.post("/login")
 async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
     user = UserManager.authenticate_user(form_data.username, form_data.password)
+
+    stripe_metadata = (
+        db.query(StripeMetadata).filter(StripeMetadata.user_id == user.id).first()
+    )
+
+    plan = (
+        {
+            "name": stripe_metadata.subcription_plan,
+            "expires_at": stripe_metadata.expires_at,
+            "subscription_id": stripe_metadata.stripe_subscription_id,
+        }
+        if stripe_metadata
+        else None
+    )
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = JwtHandler.create_access_token(
@@ -33,6 +52,7 @@ async def login(
             "username": user.username,
             "email": user.email,
             "credits": user.credits,
+            "plan": plan,
         },
         expires_delta=access_token_expires,
     )
@@ -48,17 +68,17 @@ async def login(
 
 
 @router.post("/logout")
-async def logout_user(token: str = Header(..., alias="Authorization")):
+async def logout_user(token: str | None = Header(None, alias="Authorization")):
+    if not token:
+        return {"message": "User has already been logged out."}
+
     try:
         try:
-            user = UserManager.get_user_from_access_token(token)
+            UserManager.get_user_from_access_token(token)
 
         except HTTPException:
             JwtHandler.remove_token(token)  # already expired
             return {"message": "User logged out successfully"}
-
-        if user is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
 
     except jwt.PyJWTError as e:
         print(f"Error: {e}")
@@ -74,17 +94,55 @@ async def register_user(user: BaseUser, db: Session = Depends(get_db)):
     try:
         new_user = User(
             username=user.username,
+            email=user.email,
             hashed_password=hashlib.sha256(user.password.encode()).hexdigest(),
         )
 
         db.add(new_user)
         db.commit()
+
     except sqlalchemy.exc.IntegrityError:
         raise HTTPException(
             status_code=400, detail=str("User with this username already exists")
         )
 
+    if STRIPE_ENABLED:
+        try:
+            get_or_create_stripe_customer(db, new_user)
+        except Exception:
+            traceback.print_exc()
+            raise HTTPException(
+                status_code=400, detail=str("An error occured in Stripe.")
+            )
+
     return {"message": "User registered successfully"}
+
+
+@router.get("/profile")
+async def get_user_profile(
+    user: User = Depends(UserManager.get_user_from_header),
+    db: Session = Depends(get_db),
+):
+    """Get user profile data including plan information"""
+    stripe_metadata = (
+        db.query(StripeMetadata).filter(StripeMetadata.user_id == user.id).first()
+    )
+
+    profile_data = {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "credits": user.credits,
+        "plan": {
+            "name": stripe_metadata.subcription_plan if stripe_metadata else "free",
+            "subscription_id": (
+                stripe_metadata.stripe_subscription_id if stripe_metadata else None
+            ),
+            "expires_at": stripe_metadata.expires_at if stripe_metadata else None,
+        },
+    }
+
+    return profile_data
 
 
 @router.put("/api-key")

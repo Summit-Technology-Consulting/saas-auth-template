@@ -20,6 +20,11 @@ inputs:
     required: true
     default: "Dockerfile"
 
+  version:
+    description: "Image version"
+    required: true
+    default: "latest"
+
 
 runs:
   using: composite
@@ -42,4 +47,6 @@ runs:
       context: .
       file: ${{ inputs.dockerfile }}
       push: true
-      tags: ${{ inputs.dockerhub_username }}/${{inputs.dockerhub_repo}}:${{ env.VERSION }}
+      tags: |
+        ${{ inputs.dockerhub_username }}/${{inputs.dockerhub_repo}}:${{ inputs.version }}
+        ${{ inputs.dockerhub_username }}/${{inputs.dockerhub_repo}}:latest

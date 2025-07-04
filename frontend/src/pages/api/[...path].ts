@@ -1,6 +1,6 @@
+import axios, { AxiosError, AxiosHeaders } from "axios";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getToken } from "next-auth/jwt";
-import axios, { AxiosError, AxiosHeaders } from "axios";
 
 const api = axios.create({
   baseURL: process.env.API_URL,
@@ -14,11 +14,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // Get the JWT
   const jwt = await getJwt(req);
 
-  // Get needed objects from client-side request
-  const { path } = req.query;
+  const { path, ...queryParams } = req.query;
   const method = req.method;
   const contentType = req.headers["content-type"] as string;
   const headers = new AxiosHeaders({
@@ -27,12 +25,27 @@ export default async function handler(
   const body = req.body;
   const forwardPath = Array.isArray(path) ? path.join("/") : `/${path}`;
 
+  const queryString = new URLSearchParams(
+    Object.entries(queryParams).flatMap(([key, value]) => {
+      if (Array.isArray(value)) {
+        return value
+          .filter((v): v is string => typeof v === "string")
+          .map((v) => [key, v]);
+      } else if (typeof value === "string") {
+        return [[key, value]];
+      }
+      return [];
+    })
+  );
+
+  const urlWithParams = queryString
+    ? `${forwardPath}?${queryString}`
+    : forwardPath;
+
   try {
-    // Set request specific items
     let forwardedBody = body;
 
     if (method !== "GET" && method !== "DELETE") {
-      const contentType = headers.get("Content-Type") as string;
       if (contentType?.includes("application/json") && body) {
         forwardedBody = JSON.stringify(body);
       }
@@ -51,18 +64,17 @@ export default async function handler(
     try {
       response = await api.request({
         method: method,
-        url: forwardPath,
+        url: urlWithParams,
         headers: headers,
         data: forwardedBody,
       });
     } catch (error: unknown) {
       console.log(
-        `An unexpected error occurred at ${forwardPath} with data: ${forwardedBody}`,
+        `An unexpected error occurred at ${urlWithParams} with data: ${forwardedBody}`,
         error
       );
 
       if (error instanceof AxiosError) {
-        // Check if the request is unauthorized and the JWT is expired
         if (
           error.response?.status === 401 &&
           jwt &&
@@ -72,24 +84,21 @@ export default async function handler(
           return;
         }
 
-        // Any other error that may occur
         if (error.response?.status && error.response?.status >= 400) {
           console.error(error.response?.data.detail);
           res
             .status(error.response?.status)
-            .send({ error: `Error: ${error.response?.data.detail}` });
+            .send({ error: error.response?.data.detail });
           return;
         }
       }
     }
 
-    // If the response is not found, return an internal server error
     if (!response) {
       res.status(500).json({ error: "Internal Server Error" });
       return;
     }
 
-    // Respond to the client
     res.setHeader(
       "Content-Type",
       response.headers["content-type"] || "application/json"

@@ -1,16 +1,20 @@
+import jwt from "jsonwebtoken";
 import NextAuth, { NextAuthOptions, User as NextAuthUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import jwt from "jsonwebtoken";
 
 interface ExtendedUser extends NextAuthUser {
   id: string;
   username: string;
 }
 
+const TOKEN_EXPIRY =
+  Number(process.env.ACCESS_TOKEN_EXPIRY_MINUTES) || 60 * 120;
+
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "",
   session: {
     strategy: "jwt",
+    maxAge: TOKEN_EXPIRY,
   },
   pages: {
     signOut: "/auth/signout",
@@ -42,21 +46,32 @@ export const authOptions: NextAuthOptions = {
           ?.split(";")[0]
           .split("=")[1];
 
-        const decoded = jwt.verify(
-          access_token || "",
-          process.env.JWT_SECRET || ""
-        ) as unknown as ExtendedUser;
-
-        if (response.ok && access_token) {
-          return {
-            access_token,
-            id: decoded.id,
-            username: decoded.username,
-            startingCredits: decoded.credits,
-          };
+        if (!process.env.JWT_SECRET) {
+          throw new Error("JWT_SECRET is empty.");
         }
 
-        return null;
+        try {
+          const decoded = jwt.verify(
+            access_token || "",
+            process.env.JWT_SECRET || ""
+          ) as unknown as ExtendedUser;
+
+          if (response.ok && access_token) {
+            return {
+              access_token,
+              id: decoded.id,
+              username: decoded.username,
+              startingCredits: decoded.credits,
+              email: decoded.email,
+              plan: decoded.plan,
+            };
+          }
+
+          return null;
+        } catch (error) {
+          console.error(error);
+          return null;
+        }
       },
     }),
   ],
@@ -67,6 +82,8 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.username = user.username;
         token.startingCredits = user.startingCredits;
+        token.email = user.email;
+        token.plan = user.plan;
       }
 
       return token;
@@ -78,6 +95,8 @@ export const authOptions: NextAuthOptions = {
           id: token.id as string,
           username: token.username as string,
           startingCredits: token.startingCredits as number,
+          email: token.email,
+          plan: token.plan,
         };
       }
       return session;

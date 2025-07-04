@@ -1,0 +1,12 @@
+name: PR Workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  tests:
+      uses: ./.github/workflows/reusable-test-workflow.yml

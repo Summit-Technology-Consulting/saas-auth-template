@@ -1,0 +1,28 @@
+name: Push to Helm
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+    secrets:
+        repo_token:
+            required: true
+        helm_repo_path:
+          required: true
+        chart_name:
+          required: true
+
+jobs:
+  push-helm-chart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push Helm Chart
+        uses: ./.github/actions/push-to-helm
+        with:
+          app-repo-token: ${{ secrets.repo_token }}
+          version: ${{ inputs.version }}
+          chart_name: ${{ secrets.chart_name }}
+          helm_repo_path: ${{ secrets.helm_repo_path }}

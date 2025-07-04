@@ -1,0 +1,17 @@
+services:
+  saas-backend:
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+
+  saas-frontend:
+    command: ["pnpm", "run", "dev"]
+    volumes:
+      - ./frontend/public:/app/public
+      - ./frontend/src:/app/src
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/tailwind.config.ts:/app/tailwind.config.ts
+      - ./frontend/postcss.config.mjs:/app/postcss.config.mjs
+      - ./frontend/next.config.ts:/app/next.config.ts
+      - ./frontend/eslint.config.mjs:/app/eslint.config.mjs
+      - ./frontend/components.json:/app/components.json

@@ -1,0 +1,79 @@
+name: "Version Bump"
+description: "Determines the version bump based on commit messages and updates Helm chart."
+
+inputs:
+  git_token:
+    description: "GitHub token"
+    required: true
+outputs:
+  version:
+    description: "The new version number"
+    value: ${{ steps.set_composite_version.outputs.version }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check for version bump
+      id: check_version_bump
+      shell: bash
+      run: |
+        COMMIT_MSG=$(git log -1 --pretty=%B)
+
+        if [[ $COMMIT_MSG =~ .*\[no\ bump\].* ]]; then
+          echo "version_bump=false" >> $GITHUB_OUTPUT
+          echo "Not bumping version"
+        else
+          echo "version_bump=true" >> $GITHUB_OUTPUT
+          echo "Bumping version"
+        fi
+
+    - name: Determine version type
+      if: steps.check_version_bump.outputs.version_bump != 'false'
+      shell: bash
+      id: determine_version_type
+      run: |
+        VERSION_TYPE=$(./.scripts/check-bump-type.sh)
+        echo "VERSION_TYPE=$VERSION_TYPE" >> $GITHUB_ENV
+
+    - name: Set version
+      if: steps.check_version_bump.outputs.version_bump != 'false'
+      id: set_version
+      shell: bash
+      run: |
+        VERSION=$(./.scripts/version.sh "$VERSION_TYPE")
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+      env:
+        VERSION_TYPE: ${{ env.VERSION_TYPE }}
+
+    - name: Update chart file
+      if: steps.check_version_bump.outputs.version_bump != 'false'
+      shell: bash
+      run: |
+        sed -i "s/^version: .*/version: $VERSION/" ./.deploy/helm/Chart.yaml
+
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add ./.deploy/helm/Chart.yaml
+        git commit -m "chore: bump version to $VERSION"
+        git push
+      env:
+        VERSION: ${{ env.VERSION }}
+        GITHUB_TOKEN: ${{ inputs.git_token }}
+
+    - name: Set composite output version
+      id: set_composite_version
+      shell: bash
+      run: |
+        if [[ "${{ steps.check_version_bump.outputs.version_bump }}" == "false" ]]; then
+          EXISTING_VERSION=$(grep -oP 'version:\s*\K[0-9]+\.[0-9]+\.[0-9]+' ./.deploy/helm/Chart.yaml | tr -d '[:space:]')
+          echo "version=$EXISTING_VERSION" >> $GITHUB_OUTPUT
+          echo "The existing version is $EXISTING_VERSION"
+        else
+          echo "version=${{ steps.set_version.outputs.version }}" >> $GITHUB_OUTPUT
+        fi

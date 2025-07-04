@@ -1,10 +1,12 @@
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy import create_engine
-from collections.abc import Generator
+# STL
 import os
+from collections.abc import Generator
 
+# PDM
 from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
 _ = load_dotenv()
 
