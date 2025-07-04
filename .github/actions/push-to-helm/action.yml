@@ -11,6 +11,9 @@ inputs:
   chart_name:
     required: true
     description: "The chart name"
+  helm_repo_path:
+    required: true
+    description: "The helm repo path"
 
 runs:
   using: 'composite'
@@ -36,7 +39,7 @@ runs:
 
     - name: Clone target Helm repo
       run: |
-        git clone https://github.com/jaypyles/helm.git target-repo
+        git clone https://github.com/${{ inputs.helm_repo_path }} target-repo
         cd target-repo
         git config user.name "github-actions"
         git config user.email "github-actions@github.com"
@@ -58,5 +61,5 @@ runs:
         cd target-repo
         git add charts/
         git commit -m "Update ${{ inputs.chart_name }} chart $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes"
-        git push https://x-access-token:${{ inputs.app-repo-token }}@github.com/jaypyles/helm.git gh-pages
+        git push https://x-access-token:${{ inputs.app-repo-token }}@github.com/${{ inputs.helm_repo_path }} gh-pages
       shell: bash

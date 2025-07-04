@@ -53,5 +53,7 @@ jobs:
       version: ${{ needs.version.outputs.version }}
     secrets:
       repo_token: ${{ secrets.GPAT_TOKEN }}
+      helm_repo_path: ${{ secrets.HELM_REPO_PATH }}
+      chart_name: ${{ secrets.CHART_NAME }}
 
 

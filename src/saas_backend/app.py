@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from saas_backend.pro.router import router as pro_router
 from saas_backend.auth.models import User
 from saas_backend.auth.router import router as auth_router
-from saas_backend.auth.database import Base, engine
+from saas_backend.stripe.prices import insert_price_ids_on_startup
 from saas_backend.stripe.router import router as stripe_router
 from saas_backend.auth.user_manager.user_manager import UserManager
 
@@ -22,7 +22,7 @@ _ = load_dotenv()
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    insert_price_ids_on_startup()
     yield
 
 

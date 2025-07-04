@@ -7,7 +7,7 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 # LOCAL
-from saas_backend.auth.models import User, StripeMetadata
+from saas_backend.auth.models import User, PriceId, StripeMetadata
 from saas_backend.auth.database import get_db
 from saas_backend.auth.user_manager.user_manager import UserManager
 
@@ -92,3 +92,12 @@ def require_pro_subscription(
     """Dependency that verifies user has an active pro subscription"""
     verify_active_subscription(user.id, db)
     return user
+
+
+def get_price_id_from_name(name: str, db: Session):
+    price_id = db.query(PriceId).filter(PriceId.name == name).first()
+
+    if not price_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    return price_id.id

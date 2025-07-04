@@ -9,6 +9,10 @@ on:
     secrets:
         repo_token:
             required: true
+        helm_repo_path:
+          required: true
+        chart_name:
+          required: true
 
 jobs:
   push-helm-chart:
@@ -20,4 +24,5 @@ jobs:
         with:
           app-repo-token: ${{ secrets.repo_token }}
           version: ${{ inputs.version }}
-          chart_name: 'saas-webapp-template'
+          chart_name: ${{ secrets.helm_repo_path }}
+          helm_repo_path: ${{ secrets.chart_name }}

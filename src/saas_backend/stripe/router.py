@@ -4,8 +4,7 @@ import traceback
 # PDM
 import stripe
 import stripe.error
-from fastapi import Depends, Request, APIRouter, HTTPException
-from pydantic import BaseModel
+from fastapi import Query, Depends, Request, APIRouter, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 
@@ -19,6 +18,7 @@ from saas_backend.auth.models import User, StripeMetadata
 from saas_backend.stripe.utils import get_or_create_stripe_customer
 from saas_backend.auth.database import get_db
 from saas_backend.stripe.stripe import (
+    get_price_id_from_name,
     update_user_plan_to_pro,
     reactivate_user_subscription,
 )
@@ -28,13 +28,9 @@ router = APIRouter(prefix="/stripe")
 stripe.api_key = STRIPE_API_KEY
 
 
-class CheckoutSessionRequest(BaseModel):
-    price_id: str
-
-
-@router.post("/create-checkout-session")
+@router.get("/create-checkout-session")
 def create_checkout_session(
-    request: CheckoutSessionRequest,
+    name: str = Query(...),
     user: User = Depends(UserManager.get_user_from_header),
     db: Session = Depends(get_db),
 ):
@@ -63,11 +59,13 @@ def create_checkout_session(
                 status_code=400, detail="You already have a trialing subscription."
             )
 
+    price_id = get_price_id_from_name(name, db)
+
     # No valid subscription, proceed to create a new checkout session
     session = stripe.checkout.Session.create(
         customer=str(stripe_customer.id),
         payment_method_types=["card"],
-        line_items=[{"price": request.price_id, "quantity": 1}],
+        line_items=[{"price": price_id, "quantity": 1}],
         mode="subscription",
         success_url=f"{FRONTEND_BASE_URL}/success",
         cancel_url=f"{FRONTEND_BASE_URL}/cancel",
