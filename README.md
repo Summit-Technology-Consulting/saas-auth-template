@@ -25,8 +25,10 @@ A modern, production-ready SaaS application template featuring user authenticati
 - **Modern Frontend**: Next.js 15 with TypeScript, Tailwind CSS, and Redux
 - **FastAPI Backend**: Python FastAPI with SQLAlchemy ORM
 - **Infrastructure as Code**: Terraform for GCP deployment
+- **Kubernetes and Helm**: Comes with Kubernetes and Helm options
 - **Containerized**: Docker Compose for local development
 - **Database**: PostgreSQL with Alembic migrations
+- **CI/CD**: Utilizes Github Actions for CI and CD
 
 ## 🚀 Quick Start
 
@@ -151,6 +153,34 @@ The application includes comprehensive Stripe integration for subscription manag
      - `customer.subscription.created`
      - `invoice.payment_succeeded`
      - `customer.subscription.deleted`
+
+### CI/CD Setup
+
+1. **Edit `./.github/workflows/main.yml`**
+
+    ```yml
+    build:
+    runs-on: ubuntu-latest
+    needs: [test, version]
+
+    strategy:
+      matrix:
+        include:
+          - dockerfile: ./.deploy/docker-images/Dockerfile.frontend
+            dockerhub_repo: your-frontend-repo
+          - dockerfile: ./.deploy/docker-images/Dockerfile.backend
+            dockerhub_repo: your-backend-repo
+    ```
+
+2. **Create some environment variables for the Github Repo**
+    ```bash
+    DOCKERHUB_USERNAME=your-dockerhub-username
+    GPAT_TOKEN=your-gpat-token
+    HELM_REPO_PATH=your-helm-repo-path # ex: jaypyles/helm.git
+    CHART_NAME=your-chart-name # ex: saas-webapp-template
+    ```
+
+You can always comment out the push to helm part of the workflow file or delete, if you would not like to use it.
 
 #### Features
 - **Subscription Management**: Create, cancel, and reactivate subscriptions
