@@ -24,5 +24,5 @@ jobs:
         with:
           app-repo-token: ${{ secrets.repo_token }}
           version: ${{ inputs.version }}
-          chart_name: ${{ secrets.helm_repo_path }}
-          helm_repo_path: ${{ secrets.chart_name }}
+          chart_name: ${{ secrets.chart_name }}
+          helm_repo_path: ${{ secrets.helm_repo_path }}
