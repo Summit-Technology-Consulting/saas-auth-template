@@ -1,12 +1,10 @@
 services:
   saas-backend:
-    env_file: .env
     volumes:
       - ./src:/app/src
       - ./data:/app/data
 
   saas-frontend:
-    env_file: ./frontend/.env
     command: ["pnpm", "run", "dev"]
     volumes:
       - ./frontend/public:/app/public

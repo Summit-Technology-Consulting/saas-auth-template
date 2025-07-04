@@ -41,3 +41,5 @@ services:
       POSTGRES_DB: saas_db
       POSTGRES_USER: saas_user
       POSTGRES_PASSWORD: saas_password
+    volumes:
+      - ./data:/var/lib/postgresql/data

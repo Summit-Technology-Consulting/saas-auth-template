@@ -8,7 +8,7 @@ TERRAFORM_DIRECTORY = ./.deploy/terraform
 .DEFAULT_GOAL := help
 
 # Targets
-.PHONY: help build up down up-dev pytest init-terraform apply apply-resource destroy destory-resource init-gcp-apis
+.PHONY: help build up down up-dev pytest init-terraform apply apply-resource destroy destory-resource init-gcp-apis terraform-refresh
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -45,6 +45,9 @@ destroy: ## Terraform destroy
 
 destroy-resource: ## Terraform destroy a specific resource
 	terraform -chdir=$(TERRAFORM_DIRECTORY) destroy -target=$(resource)
+
+terraform-refresh: ## Refresh Terraform Resources
+	terraform -chdir=$(TERRAFORM_DIRECTORY) refresh
 
 init-gcp-apis: ## Initialize GCP APIs
 	./.scripts/init-gcp-apis.sh project_id=$(project_id)

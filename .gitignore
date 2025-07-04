@@ -162,6 +162,8 @@ cython_debug/
 # Local Database
 *.db
 *.session.sql
+data/
+
 
 # Terraform
 **/terraform.tfvars
