@@ -40,3 +40,15 @@ variable "backend_secrets" {
   type        = map(string)
   default     = {}
 }
+
+variable "vpc_connector" {
+  description = "Optional VPC connector name (full resource name: projects/.../connectors/...)"
+  type        = string
+  default     = null
+}
+
+
+variable "database_url" {
+  description = "Database URL to connect to"
+  type        = string
+}

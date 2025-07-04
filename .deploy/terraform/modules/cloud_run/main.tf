@@ -38,6 +38,18 @@ resource "google_cloud_run_service" "frontend" {
   }
 }
 
+locals {
+  default_annotations = {
+    "run.googleapis.com/vpc-access-egress" = "all"
+  }
+
+  vpc_connector_annotation = var.vpc_connector != null ? {
+    "run.googleapis.com/vpc-access-connector" = var.vpc_connector
+  } : {}
+
+  cloud_run_annotations = merge(local.default_annotations, local.vpc_connector_annotation)
+}
+
 resource "google_cloud_run_service" "backend" {
   name     = var.backend_service_name
   location = var.region
@@ -55,6 +67,11 @@ resource "google_cloud_run_service" "backend" {
         env {
           name  = "DEPLOYMENT_TIMESTAMP"
           value = timestamp()
+        }
+
+        env {
+          name  = "DATABASE_URL"
+          value = var.database_url
         }
 
         dynamic "env" {

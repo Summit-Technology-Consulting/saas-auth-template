@@ -24,7 +24,6 @@ locals {
     STRIPE_WEBHOOK_SECRET = "STRIPE_WEBHOOK_SECRET",
     FRONTEND_BASE_URL     = "FRONTEND_BASE_URL",
     PRO_PLAN_PRICE_ID     = "PRO_PLAN_PRICE_ID",
-    DATABASE_URL          = "DATABASE_URL"
   }
 
   shared_secret_values = {
@@ -32,10 +31,22 @@ locals {
   }
 }
 
+module "vpc" {
+  source = "./modules/vpc"
+}
+
+module "cloud_sql" {
+  source     = "./modules/cloud_sql"
+  region     = var.region
+  vpc_id     = module.vpc.vpc_id
+  depends_on = [module.vpc]
+}
+
 module "secret_manager" {
   source        = "./modules/secret_manager"
   secrets       = local.secrets
   secret_values = merge(local.shared_secret_values, local.frontend_secret_values, local.backend_secret_values)
+  depends_on    = [module.cloud_sql]
 }
 
 module "cloud_run" {
@@ -46,5 +57,7 @@ module "cloud_run" {
   backend_image    = var.backend_image
   frontend_secrets = merge(local.shared_secret_values, local.frontend_secret_values)
   backend_secrets  = merge(local.shared_secret_values, local.backend_secret_values)
-  depends_on       = [module.secret_manager]
+  database_url     = "postgresql+psycopg2://${module.cloud_sql.database_user}:${module.cloud_sql.database_password}@/${module.cloud_sql.database_name}?host=/cloudsql/${module.cloud_sql.connection_name}"
+  vpc_connector    = module.vpc.connector_id
+  depends_on       = [module.secret_manager, module.vpc, module.cloud_sql]
 }

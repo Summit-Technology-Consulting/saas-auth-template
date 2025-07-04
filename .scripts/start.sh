@@ -1,4 +1,5 @@
 #!/bin/bash
+pdm run alembic upgrade head 
 
 if [ "$APP_MODE" = "dev" ]; then
     pdm run python -m uvicorn src.saas_backend.app:app --reload --host 0.0.0.0 --port 8000

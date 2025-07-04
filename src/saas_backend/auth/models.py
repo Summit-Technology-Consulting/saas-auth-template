@@ -18,13 +18,13 @@ class BaseUser(BaseModel):
 
 @final
 class User(Base):
-    __tablename__ = "user"
+    __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True, unique=True, autoincrement=True)
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     credits = Column(Integer, default=1)
-    api_key_id = Column(Integer, ForeignKey("api_key.id"))
+    
 
     stripe = relationship("StripeMetadata", back_populates="user", uselist=False)
 
@@ -33,7 +33,7 @@ class User(Base):
 class StripeMetadata(Base):
     __tablename__ = "stripe_metadata"
     id = Column(String, primary_key=True, index=True, unique=True)  # stripe_customer_id
-    user_id = Column(Integer, ForeignKey("user.id"), unique=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, index=True)
     subcription_plan = Column(String, index=True)
     stripe_subscription_id = Column(String, nullable=True)
     expires_at = Column(Integer, index=True)
@@ -45,7 +45,7 @@ class StripeMetadata(Base):
 class APIKey(Base):
     __tablename__ = "api_key"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("user.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
     api_key = Column(String)
 
 
